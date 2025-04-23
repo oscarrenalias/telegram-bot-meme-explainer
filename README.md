@@ -37,3 +37,11 @@ Please provide the right values for variables TELEGRAM_BOT_TOKEN and OPENAI_API_
 The bot has only been tested with a group, as this was its indended purpose.
 
 When added to a group, it will require admin access to the channel so that it can process all messages.
+
+# Securing the bot
+
+By default it can be added to any group, and it will listen to all messages. In order to restrict the groups it can respond to use parameter BOT_AUTHORIZED_GROUPS as a comma-separated list of group ids, as follows:
+
+```
+docker run ... -e BOT_AUTHORIZED_GROUPS=123,456,789
+```
