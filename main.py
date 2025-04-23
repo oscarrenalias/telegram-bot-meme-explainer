@@ -67,6 +67,22 @@ prompt_template = ChatPromptTemplate.from_messages([
     )
 ])
 
+# --- Authorized groups setup ---
+def parse_authorized_groups(env_value):
+    if not env_value:
+        return None  # None means allow all
+    try:
+        return set(int(x.strip()) for x in env_value.split(",") if x.strip())
+    except Exception as e:
+        logger.error(f"Error parsing BOT_AUTHORIZED_GROUPS: {e}")
+        return None
+
+BOT_AUTHORIZED_GROUPS = parse_authorized_groups(os.getenv("BOT_AUTHORIZED_GROUPS", ""))
+if BOT_AUTHORIZED_GROUPS is not None:
+    logger.info(f"Bot restricted to authorized group IDs: {BOT_AUTHORIZED_GROUPS}")
+else:
+    logger.info("Bot allowed in all groups (no restriction set)")
+
 def clean_telegram_html(html: str) -> str:
     """
     Remove unsupported HTML tags for Telegram and keep only allowed ones.
@@ -114,7 +130,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
-    logger.info("Received message in chat_id=%s from user_id=%s", message.chat_id, message.from_user.id)
+    chat_id = message.chat_id
+    logger.info("Received message in chat_id=%s from user_id=%s", chat_id, message.from_user.id)
+    # Restrict to authorized groups if set
+    if BOT_AUTHORIZED_GROUPS is not None and chat_id not in BOT_AUTHORIZED_GROUPS:
+        logger.warning(f"Received message from unauthorized group chat_id={chat_id}. Ignoring.")
+        return
     if message.reply_to_message and message.reply_to_message.photo:
         logger.info("Message is a reply to a photo. Checking for bot mention...")
         if any(entity.type == 'mention' and message.text[entity.offset:entity.offset+entity.length] == f"@{context.bot.username}" for entity in (message.entities or [])):
