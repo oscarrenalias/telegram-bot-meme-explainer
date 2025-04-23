@@ -18,6 +18,10 @@ Required environment variables:
 
 - TELEGRAM_BOT_TOKEN: Your Telegram bot token.
 - OPENAI_API_KEY: Your OpenAI API key.
+
+Optinal environment variables:
+
+- BOT_AUTHORIZED_GROUPS: Comma-separated list of group IDs where the bot is allowed to operate. If not set, the bot is allowed in all groups.
 """
 
 # 
@@ -128,6 +132,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info("Received /start command from user_id=%s", update.effective_user.id)
     await update.message.reply_text('Hello! I explain memes. Mention me in a reply to a meme image!')
 
+async def groupid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    await update.message.reply_text(f"This group's chat ID is: <code>{chat.id}</code>", parse_mode="HTML")
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message
     chat_id = message.chat_id
@@ -162,6 +170,7 @@ async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- Register handlers ---
 telegram_app.add_handler(CommandHandler('start', start))
+telegram_app.add_handler(CommandHandler('groupid', groupid))
 telegram_app.add_handler(MessageHandler(filters.TEXT & filters.REPLY, handle_message))
 if DEBUG_ALL_MESSAGES:
     logger.info("Debugging all messages enabled.")
