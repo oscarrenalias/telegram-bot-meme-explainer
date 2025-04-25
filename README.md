@@ -45,3 +45,34 @@ By default it can be added to any group, and it will listen to all messages. In 
 ```
 docker run ... -e BOT_AUTHORIZED_GROUPS=123,456,789
 ```
+
+# Deploying as a Service on Raspberry Pi (Raspbian)
+
+To run the bot as a service that starts automatically on boot, use systemd:
+
+1. Copy the template service file:
+
+   ```sh
+   sudo cp deploy/telegram-bot-meme-explainer.service.template /etc/systemd/system/telegram-bot-meme-explainer.service
+   ```
+
+   Edit `/etc/systemd/system/telegram-bot-meme-explainer.service` to set your actual credentials for `TELEGRAM_BOT_TOKEN` and `OPENAI_API_KEY`.
+
+   Configure `BOT_AUTHORIZED_GROUPS` with the corresponding Telegram group IDs to prevent the bot from being used in other groups. Use command /groupid after the bot has been added to a group to retrieve the group's ID.
+
+2. Reload systemd and enable the service:
+
+   ```sh
+   sudo systemctl daemon-reload
+   sudo systemctl enable telegram-bot-meme-explainer
+   sudo systemctl start telegram-bot-meme-explainer
+   ```
+
+3. Check status or logs:
+
+   ```sh
+   sudo systemctl status telegram-bot-meme-explainer
+   sudo journalctl -u telegram-bot-meme-explainer
+   ```
+
+This will ensure the bot starts automatically on boot and restarts if it crashes.

@@ -1,0 +1,22 @@
+#
+# This file is for deployment to Raspberry Pi (Raspbian). Please see
+# the project's README.md file for more information.
+#
+
+[Unit]
+Description=Telegram Meme Explainer Bot
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+RestartSec=10
+Environment=TELEGRAM_BOT_TOKEN=your_bot_token
+Environment=OPENAI_API_KEY=your_openai_key
+# Add the next line if you want to restrict groups
+# Environment=BOT_AUTHORIZED_GROUPS=123,456,789
+ExecStart=/usr/bin/docker run --rm --name telegram-bot-meme-explainer -e TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN} -e OPENAI_API_KEY=${OPENAI_API_KEY} ghcr.io/oscarrenalias/telegram-bot-meme-explainer:latest
+ExecStop=/usr/bin/docker stop telegram-bot-meme-explainer
+
+[Install]
+WantedBy=multi-user.target
